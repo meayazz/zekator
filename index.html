@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zekator - Zekat Hesaplayıcı</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary: #26a69a;
+            --success: #10b981;
+            --success-dark: #059669;
+            --background: #fafafa;
+            --surface: rgba(255, 255, 255, 0.85);
+            --surface-variant: rgba(245, 245, 245, 0.9);
+            --on-background: #1a1a1a;
+            --on-surface: #424242;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] {
+            --primary: #64b5f6;
+            --success: #34d399;
+            --success-dark: #10b981;
+            --background: #121212;
+            --surface: rgba(30, 30, 30, 0.85);
+            --surface-variant: rgba(40, 40, 40, 0.9);
+            --on-background: #e0e0e0;
+            --on-surface: #b0b0b0;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.4);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--on-background);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(30,136,229,0.05), transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(38,166,154,0.05), transparent 50%);
+            z-index: -1;
+            animation: bgPulse 20s ease-in-out infinite;
+        }
+        
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .header {
+            background: var(--background);
+            padding: 2.5rem 1.5rem;
+            position: relative;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            opacity: 0;
+            animation: fadeInLogo 0.6s ease 3s forwards;
+        }
+        
+        .greeting-section {
+            animation: fadeOut 0.6s ease 2.5s forwards;
+        }
+        
+        @keyframes fadeInLogo {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        .logo {
+            width: 72px;
+            height: 72px;
+        }
+        
+        .app-name {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+        }
+        
+        .greeting-text {
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+        
+        .settings-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--surface-variant);
+            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .settings-btn:hover {
+            background: var(--primary);
+            transform: translateY(-50%) scale(1.05);
+        }
+        
+        .settings-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .settings-modal.show { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } }
+        
+        .settings-content {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px var(--shadow);
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-title { font-size: 1.5rem; font-weight: 600; }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        
+        .close-btn:hover { background: var(--surface-variant); }
+        
+        .setting-group { margin-bottom: 1.5rem; }
+        
+        .setting-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-variant);
+            color: var(--on-background);
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .madhhab-section { margin-bottom: 2rem; }
+        
+        .madhhab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .madhhab-card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .madhhab-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        .madhhab-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px var(--shadow);
+            transform: translateY(-2px);
+        }
+        
+        .madhhab-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(30,136,229,0.05), rgba(38,166,154,0.05));
+        }
+        
+        .madhhab-card.selected::before { transform: scaleX(1); }
+        
+        .madhhab-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .madhhab-details {
+            font-size: 0.8rem;
+            color: var(--on-surface);
+            line-height: 1.4;
+            opacity: 0.85;
+        }
+        
+        .categories-section { margin-bottom: 2rem; }
+        
+        .category-card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .category-card.expanded { box-shadow: 0 8px 32px var(--shadow); }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .category-header:hover { background: var(--surface-variant); }
+        
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .category-icon { font-size: 1.5rem; }
+        
+        .expand-icon {
+            font-size: 1.25rem;
+            transition: transform 0.3s;
+        }
+        
+        .category-card.expanded .expand-icon { transform: rotate(180deg); }
+        
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .category-card.expanded .category-content { max-height: 3000px; }
+        
+        .subcategory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 0 1.5rem 1.5rem;
+        }
+        
+        .subcategory-card {
+            background: linear-gradient(135deg, var(--sub-color-light), var(--sub-color));
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 1.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+        }
+        
+        .subcategory-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 14px;
+        }
+        
+        .subcategory-card:hover::before { opacity: 1; }
+        .subcategory-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .subcategory-card.selected {
+            border-color: white;
+            box-shadow: 0 0 0 3px var(--sub-color);
+        }
+        
+        .subcategory-icon {
+            font-size: 2.25rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        .subcategory-name {
+            font-weight: 600;
+            color: white;
+            font-size: 0.95rem;
+        }
+        
+        .input-section {
+            display: none;
+            padding: 0 1.5rem 1.5rem;
+            animation: slideDownInput 0.3s;
+        }
+        
+        .input-section.show { display: block; }
+        
+        @keyframes slideDownInput {
+            from { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .input-label {
+            font-weight: 500;
+            color: var(--on-surface);
+            font-size: 0.9rem;
+        }
+        
+        .input-field {
+            padding: 1.1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-variant);
+            color: var(--on-background);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+        
+        .input-help {
+            font-size: 0.75rem;
+            color: var(--on-surface);
+            opacity: 0.7;
+        }
+        
+        .close-category-btn {
+            margin: 1rem 1.5rem;
+            padding: 0.875rem 1.5rem;
+            background: var(--surface-variant);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--on-surface);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: calc(100% - 3rem);
+        }
+        
+        .close-category-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 2.25rem 2rem;
+            border: none;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--success), var(--success-dark));
+            color: white;
+            font-family: inherit;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.3);
+            margin-bottom: 3rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-primary.calculated {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 6px 24px rgba(30, 136, 229, 0.3);
+        }
+        
+        .btn-primary.calculated:hover {
+            box-shadow: 0 8px 32px rgba(30, 136, 229, 0.4);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 22px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 8px 32px rgba(30, 136, 229, 0.4);
+            display: none;
+        }
+        
+        .result-card.show {
+            display: block;
+            animation: scaleIn 0.5s;
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+        }
+        
+        .result-title {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.75rem;
+        }
+        
+        .result-amount {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.75rem;
+            padding-top: 1.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .result-detail-label {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+        
+        .result-detail-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+        
+        .ai-analysis {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            display: none;
+        }
+        
+        .ai-analysis.show {
+            display: block;
+            animation: slideUpAnim 0.5s;
+        }
+        
+        @keyframes slideUpAnim {
+            from { opacity: 0; transform: translateY(20px); }
+        }
+        
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.6rem 1.25rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+        
+        .ai-content {
+            color: var(--on-surface);
+            line-height: 1.9;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @media (max-width: 768px) {
+            .header { padding: 1.75rem 1rem; }
+            .logo { width: 60px; height: 60px; }
+            .app-name, .greeting-text { font-size: 2rem; }
+            .settings-btn { width: 48px; height: 48px; }
+            .madhhab-grid { grid-template-columns: 1fr; }
+            .subcategory-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+            .result-amount { font-size: 2.5rem; }
+            .btn-primary { padding: 1.75rem; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="greeting-section" id="greetingSection">
+                <div class="greeting-text" id="greetingText"></div>
+            </div>
+            <div class="logo-section" id="logoSection">
+                <svg class="logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1e88e5"/>
+                            <stop offset="100%" style="stop-color:#26a69a"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="80" height="80" rx="18" fill="url(#logoGrad)"/>
+                    <path d="M40 22C40 22 35 27 35 32C35 36 37 38 40 38C43 38 45 36 45 32C45 27 40 22 40 22Z" fill="white" opacity="0.95"/>
+                    <circle cx="40" cy="48" r="10" fill="white" opacity="0.95"/>
+                    <path d="M50 56L54 60M30 56L26 60" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.95"/>
+                    <circle cx="40" cy="48" r="4" fill="url(#logoGrad)"/>
+                </svg>
+                <h1 class="app-name">ZEKATOR</h1>
+            </div>
+            <button class="settings-btn" id="settingsBtn">⚙️</button>
+        </div>
+    </div>
+
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2 class="settings-title">Ayarlar</h2>
+                <button class="close-btn" id="closeSettings">✕</button>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label" for="language">Dil</label>
+                <select id="language">
+                    <option value="tr">Türkçe</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label" for="theme">Tema</label>
+                <select id="theme">
+                    <option value="light">Gündüz</option>
+                    <option value="dark">Gece</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label" for="fontSize">Yazı Boyutu</label>
+                <select id="fontSize">
+                    <option value="small">Küçük</option>
+                    <option value="medium" selected>Orta</option>
+                    <option value="large">Büyük</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="madhhab-section">
+            <h2 class="section-title">Mezhep Seçimi</h2>
+            <div class="madhhab-grid">
+                <div class="madhhab-card selected" data-madhhab="hanafi">
+                    <div class="madhhab-name">Hanefi</div>
+                    <div class="madhhab-details">Nisab: 80.18 gr altın • Ziynet eşyaları zekata tabidir</div>
+                </div>
+                <div class="madhhab-card" data-madhhab="shafi">
+                    <div class="madhhab-name">Şafii</div>
+                    <div class="madhhab-details">Nisab: 80.18 gr altın • Normal ziynetler zekata tabi değildir</div>
+                </div>
+                <div class="madhhab-card" data-madhhab="maliki">
+                    <div class="madhhab-name">Maliki</div>
+                    <div class="madhhab-details">Nisab: 80.18 gr altın • Normal ziynetler zekata tabi değildir</div>
+                </div>
+                <div class="madhhab-card" data-madhhab="hanbali">
+                    <div class="madhhab-name">Hanbeli</div>
+                    <div class="madhhab-details">Nisab: 80.18 gr altın • Normal ziynetler zekata tabi değildir</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="categories-section">
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">💰</span><span>Nakit ve Birikim</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="cash" style="--sub-color:#8b5cf6;--sub-color-light:#a78bfa">
+                            <span class="subcategory-icon">💵</span>
+                            <div class="subcategory-name">Nakit Para</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="bank" style="--sub-color:#7c3aed;--sub-color-light:#a78bfa">
+                            <span class="subcategory-icon">🏦</span>
+                            <div class="subcategory-name">Banka Hesabı</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="deposit" style="--sub-color:#6d28d9;--sub-color-light:#a78bfa">
+                            <span class="subcategory-icon">📊</span>
+                            <div class="subcategory-name">Vadeli Mevduat</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="cash">
+                        <div class="input-group">
+                            <label class="input-label">Nakit Para (TL)</label>
+                            <input type="number" class="input-field" id="cash" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Kasanızda, cüzdanınızda bulunan paralar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="bank">
+                        <div class="input-group">
+                            <label class="input-label">Banka Hesabı (TL)</label>
+                            <input type="number" class="input-field" id="bank" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Vadesiz hesaplardaki paralar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="deposit">
+                        <div class="input-group">
+                            <label class="input-label">Vadeli Mevduat (TL)</label>
+                            <input type="number" class="input-field" id="deposit" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Vadeli hesaplardaki birikimler</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">✨</span><span>Altın ve Gümüş</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="gold22" style="--sub-color:#f59e0b;--sub-color-light:#fbbf24">
+                            <span class="subcategory-icon">🏅</span>
+                            <div class="subcategory-name">22 Ayar Altın</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="gold24" style="--sub-color:#d97706;--sub-color-light:#fbbf24">
+                            <span class="subcategory-icon">💛</span>
+                            <div class="subcategory-name">24 Ayar Altın</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="silver" style="--sub-color:#94a3b8;--sub-color-light:#cbd5e1">
+                            <span class="subcategory-icon">⚪</span>
+                            <div class="subcategory-name">Gümüş</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="platinum" style="--sub-color:#64748b;--sub-color-light:#94a3b8">
+                            <span class="subcategory-icon">💎</span>
+                            <div class="subcategory-name">Platin</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="gold22">
+                        <div class="input-group">
+                            <label class="input-label">22 Ayar Altın (gram)</label>
+                            <input type="number" class="input-field" id="gold22" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">22 ayar altın ziynet ve külçe</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="gold24">
+                        <div class="input-group">
+                            <label class="input-label">24 Ayar Altın (gram)</label>
+                            <input type="number" class="input-field" id="gold24" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">24 ayar külçe altın</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="silver">
+                        <div class="input-group">
+                            <label class="input-label">Gümüş (gram)</label>
+                            <input type="number" class="input-field" id="silver" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Gümüş ziynet ve külçe</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="platinum">
+                        <div class="input-group">
+                            <label class="input-label">Platin (gram)</label>
+                            <input type="number" class="input-field" id="platinum" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Platin külçe ve ziynet</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">💱</span><span>Döviz</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="usd" style="--sub-color:#10b981;--sub-color-light:#34d399">
+                            <span class="subcategory-icon">💵</span>
+                            <div class="subcategory-name">USD ($)</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="eur" style="--sub-color:#059669;--sub-color-light:#34d399">
+                            <span class="subcategory-icon">💶</span>
+                            <div class="subcategory-name">EUR (€)</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="gbp" style="--sub-color:#047857;--sub-color-light:#34d399">
+                            <span class="subcategory-icon">💷</span>
+                            <div class="subcategory-name">GBP (£)</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="otherCur" style="--sub-color:#065f46;--sub-color-light:#34d399">
+                            <span class="subcategory-icon">💴</span>
+                            <div class="subcategory-name">Diğer Döviz</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="usd">
+                        <div class="input-group">
+                            <label class="input-label">USD (TL değeri)</label>
+                            <input type="number" class="input-field" id="usd" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Dolar varlıklarınızın TL karşılığı</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="eur">
+                        <div class="input-group">
+                            <label class="input-label">EUR (TL değeri)</label>
+                            <input type="number" class="input-field" id="eur" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Euro varlıklarınızın TL karşılığı</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="gbp">
+                        <div class="input-group">
+                            <label class="input-label">GBP (TL değeri)</label>
+                            <input type="number" class="input-field" id="gbp" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Sterlin varlıklarınızın TL karşılığı</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="otherCur">
+                        <div class="input-group">
+                            <label class="input-label">Diğer Dövizler (TL değeri)</label>
+                            <input type="number" class="input-field" id="otherCur" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Diğer döviz varlıklarınızın TL karşılığı</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">📈</span><span>Yatırımlar</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="stocks" style="--sub-color:#3b82f6;--sub-color-light:#60a5fa">
+                            <span class="subcategory-icon">📊</span>
+                            <div class="subcategory-name">Hisse Senedi</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="funds" style="--sub-color:#2563eb;--sub-color-light:#60a5fa">
+                            <span class="subcategory-icon">💼</span>
+                            <div class="subcategory-name">Yatırım Fonu</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="bonds" style="--sub-color:#1d4ed8;--sub-color-light:#60a5fa">
+                            <span class="subcategory-icon">📜</span>
+                            <div class="subcategory-name">Tahvil</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="business" style="--sub-color:#1e40af;--sub-color-light:#60a5fa">
+                            <span class="subcategory-icon">🏪</span>
+                            <div class="subcategory-name">Ticari Mal</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="stocks">
+                        <div class="input-group">
+                            <label class="input-label">Hisse Senedi (TL)</label>
+                            <input type="number" class="input-field" id="stocks" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Hisse senetlerinin güncel değeri</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="funds">
+                        <div class="input-group">
+                            <label class="input-label">Yatırım Fonu (TL)</label>
+                            <input type="number" class="input-field" id="funds" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Yatırım fonlarının güncel değeri</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="bonds">
+                        <div class="input-group">
+                            <label class="input-label">Tahvil (TL)</label>
+                            <input type="number" class="input-field" id="bonds" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Tahvillerin güncel değeri</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="business">
+                        <div class="input-group">
+                            <label class="input-label">Ticari Mallar (TL)</label>
+                            <input type="number" class="input-field" id="business" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Satmak için edinilen mallar</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">🌾</span><span>Zirai Ürünler</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="grains" style="--sub-color:#84cc16;--sub-color-light:#a3e635">
+                            <span class="subcategory-icon">🌾</span>
+                            <div class="subcategory-name">Tahıl</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="fruits" style="--sub-color:#65a30d;--sub-color-light:#a3e635">
+                            <span class="subcategory-icon">🍇</span>
+                            <div class="subcategory-name">Meyve</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="veggies" style="--sub-color:#4d7c0f;--sub-color-light:#a3e635">
+                            <span class="subcategory-icon">🥬</span>
+                            <div class="subcategory-name">Sebze</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="grains">
+                        <div class="input-group">
+                            <label class="input-label">Tahıl Ürünleri (TL değeri)</label>
+                            <input type="number" class="input-field" id="grains" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Buğday, arpa, mısır gibi tahıllar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="fruits">
+                        <div class="input-group">
+                            <label class="input-label">Meyve Ürünleri (TL değeri)</label>
+                            <input type="number" class="input-field" id="fruits" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Üzüm, hurma gibi meyveler</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="veggies">
+                        <div class="input-group">
+                            <label class="input-label">Sebze Ürünleri (TL değeri)</label>
+                            <input type="number" class="input-field" id="veggies" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Ticari amaçlı sebzeler</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">💸</span><span>Alacaklar</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="loanGiven" style="--sub-color:#06b6d4;--sub-color-light:#22d3ee">
+                            <span class="subcategory-icon">🤝</span>
+                            <div class="subcategory-name">Verilen Borç</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="rent" style="--sub-color:#0891b2;--sub-color-light:#22d3ee">
+                            <span class="subcategory-icon">🏠</span>
+                            <div class="subcategory-name">Kira Alacağı</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="otherRec" style="--sub-color:#0e7490;--sub-color-light:#22d3ee">
+                            <span class="subcategory-icon">📋</span>
+                            <div class="subcategory-name">Diğer Alacaklar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="loanGiven">
+                        <div class="input-group">
+                            <label class="input-label">Verilen Borç (TL)</label>
+                            <input type="number" class="input-field" id="loanGiven" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Geri alma ihtimali yüksek verdiğiniz borçlar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="rent">
+                        <div class="input-group">
+                            <label class="input-label">Kira Alacağı (TL)</label>
+                            <input type="number" class="input-field" id="rent" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Tahsil edilecek kira bedelleri</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="otherRec">
+                        <div class="input-group">
+                            <label class="input-label">Diğer Alacaklar (TL)</label>
+                            <input type="number" class="input-field" id="otherRec" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Diğer tahsil edilebilir alacaklar</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title"><span class="category-icon">💳</span><span>Borçlar</span></div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory-grid">
+                        <div class="subcategory-card" data-sub="shortDebt" style="--sub-color:#ef4444;--sub-color-light:#f87171">
+                            <span class="subcategory-icon">⏰</span>
+                            <div class="subcategory-name">Kısa Vadeli</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="credit" style="--sub-color:#dc2626;--sub-color-light:#f87171">
+                            <span class="subcategory-icon">💳</span>
+                            <div class="subcategory-name">Kredi Kartı</div>
+                        </div>
+                        <div class="subcategory-card" data-sub="otherDebt" style="--sub-color:#b91c1c;--sub-color-light:#f87171">
+                            <span class="subcategory-icon">📝</span>
+                            <div class="subcategory-name">Diğer Borçlar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="shortDebt">
+                        <div class="input-group">
+                            <label class="input-label">Kısa Vadeli Borç (TL)</label>
+                            <input type="number" class="input-field" id="shortDebt" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Gelecek yıl ödeyeceğiniz borçlar</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="credit">
+                        <div class="input-group">
+                            <label class="input-label">Kredi Kartı Borcu (TL)</label>
+                            <input type="number" class="input-field" id="credit" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Mevcut kredi kartı borçları</div>
+                        </div>
+                    </div>
+                    <div class="input-section" data-input="otherDebt">
+                        <div class="input-group">
+                            <label class="input-label">Diğer Borçlar (TL)</label>
+                            <input type="number" class="input-field" id="otherDebt" placeholder="0" min="0" step="0.01">
+                            <div class="input-help">Ödemeniz gereken diğer borçlar</div>
+                        </div>
+                    </div>
+                    <button class="close-category-btn">✕ Kapat</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" id="calcBtn">Zekat Hesapla</button>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-title">Ödenecek Zekat Miktarı</div>
+            <div class="result-amount" id="resultAmount">0 ₺</div>
+            <div class="result-details">
+                <div class="result-detail">
+                    <div class="result-detail-label">Toplam Net Varlık</div>
+                    <div class="result-detail-value" id="totalAssets">0 ₺</div>
+                </div>
+                <div class="result-detail">
+                    <div class="result-detail-label">Nisab Miktarı</div>
+                    <div class="result-detail-value" id="nisabAmount">0 ₺</div>
+                </div>
+                <div class="result-detail">
+                    <div class="result-detail-label">Durum</div>
+                    <div class="result-detail-value" id="statusValue">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-analysis" id="aiAnalysis">
+            <div class="ai-badge"><span>✨</span><span>AI Destekli Analiz</span></div>
+            <div class="ai-content" id="aiContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let madhhab = 'hanafi';
+        const gold22Price = 6360.29, gold24Price = 6943.53, silverPrice = 108.67;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hr = new Date().getHours();
+            document.getElementById('greetingText').textContent = 
+                hr < 6 ? 'İyi geceler! 🌙' : hr < 12 ? 'Günaydın! ☀️' : hr < 17 ? 'İyi günler! 👋' : 'İyi akşamlar! 🌆';
+
+            document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.add('show');
+            document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.remove('show');
+            document.getElementById('settingsModal').onclick = e => e.target.id === 'settingsModal' && document.getElementById('settingsModal').classList.remove('show');
+
+            document.getElementById('theme').onchange = e => document.documentElement.setAttribute('data-theme', e.target.value);
+            document.getElementById('fontSize').onchange = e => document.body.style.fontSize = ({small:'14px',medium:'16px',large:'18px'})[e.target.value];
+
+            document.querySelectorAll('.madhhab-card').forEach(c => c.onclick = () => {
+                document.querySelectorAll('.madhhab-card').forEach(x => x.classList.remove('selected'));
+                c.classList.add('selected');
+                madhhab = c.dataset.madhhab;
+            });
+
+            document.querySelectorAll('.category-header').forEach(h => h.onclick = () => h.parentElement.classList.toggle('expanded'));
+
+            document.querySelectorAll('.subcategory-card').forEach(c => c.onclick = () => {
+                c.classList.toggle('selected');
+                const inp = document.querySelector(`[data-input="${c.dataset.sub}"]`);
+                inp && inp.classList.toggle('show');
+            });
+
+            document.querySelectorAll('.close-category-btn').forEach(b => b.onclick = e => {
+                e.stopPropagation();
+                const card = b.closest('.category-card');
+                card.classList.remove('expanded');
+                card.querySelectorAll('.subcategory-card').forEach(c => c.classList.remove('selected'));
+                card.querySelectorAll('.input-section').forEach(s => s.classList.remove('show'));
+            });
+
+            document.getElementById('calcBtn').onclick = async () => {
+                const v = id => parseFloat(document.getElementById(id)?.value) || 0;
+                const btn = document.getElementById('calcBtn');
+                btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Hesaplanıyor...</span></div>';
+                btn.disabled = true;
+
+                const total = v('cash') + v('bank') + v('deposit') + 
+                    v('gold22')*gold22Price + v('gold24')*gold24Price + v('silver')*silverPrice + v('platinum') +
+                    v('usd') + v('eur') + v('gbp') + v('otherCur') +
+                    v('stocks') + v('funds') + v('bonds') + v('business') +
+                    v('grains') + v('fruits') + v('veggies') +
+                    v('loanGiven') + v('rent') + v('otherRec') -
+                    v('shortDebt') - v('credit') - v('otherDebt');
+
+                const nisab = 80.18 * gold24Price;
+                const zakat = total >= nisab ? total * 0.025 : 0;
+                const fmt = n => new Intl.NumberFormat('tr-TR', {style:'currency', currency:'TRY'}).format(n);
+
+                document.getElementById('resultAmount').textContent = fmt(zakat);
+                document.getElementById('totalAssets').textContent = fmt(total);
+                document.getElementById('nisabAmount').textContent = fmt(nisab);
+                document.getElementById('statusValue').textContent = zakat > 0 ? 'Zekat Vermeniz Gerekiyor ✓' : 'Zekat Vermek Gerekmez';
+                document.getElementById('resultCard').classList.add('show');
+
+                const aiContent = document.getElementById('aiContent');
+                aiContent.innerHTML = '<div class="loading"><div class="spinner"></div><span>AI analiz yapılıyor...</span></div>';
+                document.getElementById('aiAnalysis').classList.add('show');
+
+                try {
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            model: 'claude-sonnet-4-20250514',
+                            max_tokens: 1000,
+                            messages: [{
+                                role: 'user',
+                                content: `${madhhab.charAt(0).toUpperCase()+madhhab.slice(1)} mezhebi kurallarına göre zekat analizi yap. Net varlık ${total.toFixed(2)} TL, nisab ${nisab.toFixed(2)} TL. ${zakat>0?`Zekat ${zakat.toFixed(2)} TL.`:'Zekat gerekmez.'} Kısa ve anlaşılır açıkla.`
+                            }]
+                        })
+                    });
+                    const data = await res.json();
+                    aiContent.innerHTML = `<p style="white-space:pre-wrap">${data.content.find(c=>c.type==='text')?.text || 'Analiz oluşturulamadı'}</p>`;
+                } catch {
+                    aiContent.innerHTML = '<p>AI analizi şu anda kullanılamıyor.</p>';
+                }
+
+                btn.textContent = 'Yeni Hesaplama Yap';
+                btn.disabled = false;
+                btn.classList.add('calculated');
+            };
+        });
+    </script>
+</body>
+</html>
